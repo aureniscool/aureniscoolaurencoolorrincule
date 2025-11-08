@@ -1,251 +1,110 @@
-// dashboard.js
-document.addEventListener('DOMContentLoaded', () => {
+import { auth, db } from "./firebase-global.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { doc, getDoc, updateDoc, collection, addDoc, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-  // --- Firebase references ---
-  const auth = firebase.auth();
-  const db = firebase.firestore();
-  const storage = firebase.storage();
+// Elements
+const totalBalanceBTC = document.getElementById("btc-balance");
+const totalBalanceUSD = document.getElementById("btc-usd");
+const activePlanName = document.getElementById("active-plan-name");
+const activePlanDetails = document.getElementById("active-plan-details");
+const walletAddress = document.getElementById("wallet-address");
+const depositBtn = document.getElementById("Request-Deposit");
+const withdrawBtn = document.getElementById("withdraw-submit");
+const referralCode = document.getElementById("ref-code");
+const leaderboardList = document.getElementById("leaderboard-full-list");
 
-  let currentUser = null;
-  let isAdmin = false;
+// Auth check
+let currentUserData = {};
+onAuthStateChanged(auth, async user => {
+    if(!user) return window.location.href = "login.html";
+    const userRef = doc(db, "users", user.uid);
 
-  // --- DOM Elements ---
-  const sections = document.querySelectorAll('.dashboard-section');
-  const navButtons = document.querySelectorAll('.nav-btn');
-  const logoutBtn = document.getElementById('logout-btn');
-  const snackbar = document.getElementById('dt-snackbar');
+    // Snapshot: live updates
+    onSnapshot(userRef, docSnap => {
+        if(!docSnap.exists()) return;
+        currentUserData = docSnap.data();
 
-  // Overview
-  const totalBalanceBTC = document.getElementById('totalBalanceBTC');
-  const totalBalanceUSD = document.getElementById('totalBalanceUSD');
-  const activePlanEl = document.getElementById('activePlan');
-  const portfolioChartEl = document.getElementById('portfolioChart');
+        // Display balances
+        totalBalanceBTC.textContent = currentUserData.balanceBTC?.toFixed(4) + " BTC" || "0 BTC";
+        totalBalanceUSD.textContent = currentUserData.balanceUSD?.toFixed(2) + " USD" || "0 USD";
 
-  // Transactions
-  const txTableBody = document.getElementById('tx-table-body');
+        // Active plan
+        activePlanName.textContent = currentUserData.activePlan || "—";
+        activePlanDetails.textContent = currentUserData.planDetails || "Select a plan to start earning";
 
-  // Deposit
-  const depositWalletAddress = document.getElementById('deposit-wallet-address');
-  const depositQR = document.getElementById('deposit-qr');
-  const depositCopyBtn = document.getElementById('deposit-copy');
-  const depositForm = document.getElementById('deposit-form');
-  const depositAmount = document.getElementById('deposit-amount');
-  const depositPlan = document.getElementById('deposit-plan');
+        // Referral
+        referralCode.textContent = currentUserData.referral || "—";
 
-  // Withdraw
-  const withdrawForm = document.getElementById('withdraw-form');
-  const withdrawAmount = document.getElementById('withdraw-amount');
-  const withdrawWallet = document.getElementById('withdraw-wallet');
+        // Welcome
+        const displayNameEl = document.getElementById("user-displayname");
+        if(displayNameEl) displayNameEl.textContent = `Welcome, ${currentUserData.name || "User"}!`;
 
-  // Leaderboard
-  const leaderboardList = document.getElementById('leaderboard-list');
-  const toggleLeaderboard = document.getElementById('toggle-leaderboard');
+        // Wallet delay show
+        setTimeout(() => {
+            walletAddress.textContent = user.uid;
+            walletAddress.classList.remove("hidden");
+        }, 10000);
+    });
+});
 
-  // Chat
-  const chatBox = document.getElementById('chat-box');
-  const chatInput = document.getElementById('chat-input');
-  const chatSend = document.getElementById('chat-send');
+// Deposit request
+if(depositBtn){
+    depositBtn.addEventListener("click", async e=>{
+        e.preventDefault();
+        const amount = parseFloat(document.getElementById("deposit-amount").value);
+        const plan = document.getElementById("deposit-plan").value;
+        if(!amount || amount <=0) return alert("Enter a valid amount");
+        try {
+            await addDoc(collection(db, "deposits"), {
+                uid: auth.currentUser.uid,
+                name: currentUserData.name || "User",
+                amount,
+                plan,
+                status: "pending",
+                createdAt: new Date()
+            });
+            alert("Deposit request sent! Admin will confirm.");
+        } catch(err){ console.error(err); alert("Error sending deposit request"); }
+    });
+}
 
-  // Admin
-  const qrUpload = document.getElementById('qr-upload');
-  const adminPlanSwitch = document.getElementById('admin-plan-switch');
-  const applyPlanSwitch = document.getElementById('apply-plan-switch');
+// Withdraw request
+if(withdrawBtn){
+    withdrawBtn.addEventListener("click", async e=>{
+        e.preventDefault();
+        const amount = parseFloat(document.getElementById("withdraw-amount").value);
+        const wallet = document.getElementById("withdraw-wallet").value;
+        if(!amount || !wallet) return alert("Enter valid amount and wallet");
+        try {
+            await addDoc(collection(db, "withdrawals"), {
+                uid: auth.currentUser.uid,
+                name: currentUserData.name || "User",
+                amount,
+                wallet,
+                status: "pending",
+                createdAt: new Date()
+            });
+            alert("Withdrawal request submitted for admin approval!");
+        } catch(err){ console.error(err); alert("Error submitting withdrawal"); }
+    });
+}
 
-  // --- Functions ---
-  function showSection(id) {
-    sections.forEach(sec => sec.style.display = sec.id === id ? 'block' : 'none');
-  }
+// Leaderboard
+const leaderboardToggleRef = doc(db, "adminControls", "leaderboard");
+onSnapshot(leaderboardToggleRef, snap=>{
+    if(!snap.exists()) return;
+    const enabled = snap.data()?.enabled;
+    leaderboardList.parentElement.style.display = enabled ? "block" : "none";
 
-  function showSnackbar(msg, duration = 3000) {
-    snackbar.textContent = msg;
-    snackbar.classList.add('show');
-    setTimeout(() => snackbar.classList.remove('show'), duration);
-  }
-
-  function updateOverview(userData) {
-    totalBalanceBTC.textContent = `${userData.btcBalance || 0} BTC`;
-    totalBalanceUSD.textContent = `$${userData.usdBalance || 0}`;
-    activePlanEl.textContent = userData.plan || '—';
-  }
-
-  function loadTransactions(uid) {
-    txTableBody.innerHTML = '<tr><td colspan="4">Loading...</td></tr>';
-    db.collection('transactions')
-      .where('uid', '==', uid)
-      .orderBy('date', 'desc')
-      .get()
-      .then(snapshot => {
-        txTableBody.innerHTML = '';
-        snapshot.forEach(doc => {
-          const tx = doc.data();
-          const tr = document.createElement('tr');
-          tr.innerHTML = `<td>${new Date(tx.date.seconds * 1000).toLocaleString()}</td>
-                          <td>${tx.type}</td>
-                          <td>${tx.amount}</td>
-                          <td>${tx.status}</td>`;
-          txTableBody.appendChild(tr);
+    if(enabled){
+        const q = query(collection(db, "users"), orderBy("balanceUSD","desc"), limit(10));
+        onSnapshot(q, snapUsers=>{
+            leaderboardList.innerHTML = "";
+            snapUsers.forEach(u=>{
+                const li = document.createElement("li");
+                li.textContent = `${u.data().name || "User"} — $${u.data().balanceUSD?.toFixed(2) || 0}`;
+                leaderboardList.appendChild(li);
+            });
         });
-      });
-  }
-
-  function loadPortfolioChart(userData) {
-    const ctx = portfolioChartEl.getContext('2d');
-    new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: userData.portfolioDates || [],
-        datasets: [{
-          label: 'Portfolio Value (USD)',
-          data: userData.portfolioValues || [],
-          borderColor: '#0ff',
-          backgroundColor: 'rgba(0,255,255,0.2)',
-          tension: 0.2
-        }]
-      },
-      options: { responsive: true, plugins: { legend: { display: false } } }
-    });
-  }
-
-  function loadLeaderboard() {
-    db.collection('users')
-      .orderBy('usdBalance', 'desc')
-      .limit(10)
-      .get()
-      .then(snapshot => {
-        leaderboardList.innerHTML = '';
-        snapshot.forEach(doc => {
-          const user = doc.data();
-          const li = document.createElement('li');
-          li.textContent = `${user.displayName || 'Anonymous'} — $${user.usdBalance || 0}`;
-          leaderboardList.appendChild(li);
-        });
-      });
-  }
-
-  function loadChat() {
-    db.collection('chat')
-      .orderBy('timestamp', 'asc')
-      .onSnapshot(snapshot => {
-        chatBox.innerHTML = '';
-        snapshot.forEach(doc => {
-          const msg = doc.data();
-          const div = document.createElement('div');
-          div.className = msg.uid === currentUser.uid ? 'chat-msg self' : 'chat-msg';
-          div.textContent = `${msg.sender}: ${msg.text}`;
-          chatBox.appendChild(div);
-          chatBox.scrollTop = chatBox.scrollHeight;
-        });
-      });
-  }
-
-  // --- Event Listeners ---
-  navButtons.forEach(btn => {
-    btn.addEventListener('click', () => showSection(btn.dataset.target));
-  });
-
-  logoutBtn.addEventListener('click', () => auth.signOut());
-
-  depositCopyBtn.addEventListener('click', () => {
-    navigator.clipboard.writeText(depositWalletAddress.textContent)
-      .then(() => showSnackbar('Wallet address copied!'));
-  });
-
-  depositForm.addEventListener('submit', e => {
-    e.preventDefault();
-    const amount = parseFloat(depositAmount.value);
-    const plan = depositPlan.value;
-    if (!amount || amount <= 0) return showSnackbar('Invalid amount!');
-    db.collection('transactions').add({
-      uid: currentUser.uid,
-      type: 'deposit',
-      amount: amount,
-      plan,
-      status: 'pending',
-      date: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(() => showSnackbar('Deposit request submitted!'));
-  });
-
-  withdrawForm.addEventListener('submit', e => {
-    e.preventDefault();
-    const amount = parseFloat(withdrawAmount.value);
-    const wallet = withdrawWallet.value.trim();
-    if (!amount || !wallet) return showSnackbar('Fill all fields!');
-    db.collection('transactions').add({
-      uid: currentUser.uid,
-      type: 'withdraw',
-      amount,
-      wallet,
-      status: 'pending',
-      date: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(() => showSnackbar('Withdrawal request submitted!'));
-  });
-
-  chatSend.addEventListener('click', () => {
-    const text = chatInput.value.trim();
-    if (!text) return;
-    db.collection('chat').add({
-      uid: currentUser.uid,
-      sender: currentUser.displayName || 'User',
-      text,
-      timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    });
-    chatInput.value = '';
-  });
-
-  toggleLeaderboard.addEventListener('change', () => {
-    db.collection('settings').doc('leaderboard').set({ enabled: toggleLeaderboard.checked });
-    showSnackbar(`Leaderboard ${toggleLeaderboard.checked ? 'enabled' : 'disabled'}`);
-  });
-
-  qrUpload.addEventListener('change', e => {
-    if (!isAdmin) return;
-    const file = e.target.files[0];
-    if (!file) return;
-    const storageRef = storage.ref(`deposit_qr/${file.name}`);
-    storageRef.put(file).then(() => {
-      storageRef.getDownloadURL().then(url => {
-        db.collection('settings').doc('depositQR').set({ url });
-        depositQR.src = url;
-        showSnackbar('Deposit QR updated!');
-      });
-    });
-  });
-
-  applyPlanSwitch.addEventListener('click', () => {
-    if (!isAdmin) return;
-    const plan = adminPlanSwitch.value;
-    db.collection('users').get().then(snapshot => {
-      snapshot.forEach(doc => {
-        doc.ref.update({ plan });
-      });
-    });
-    showSnackbar(`All user plans switched to ${plan}`);
-  });
-
-  // --- Auth Listener ---
-  auth.onAuthStateChanged(user => {
-    if (!user) {
-      window.location.href = '/login.html';
-      return;
     }
-    currentUser = user;
-    db.collection('users').doc(user.uid).get().then(doc => {
-      const data = doc.data() || {};
-      isAdmin = data.role === 'admin';
-
-      depositWalletAddress.textContent = data.walletAddress || '—';
-      if (data.depositQR) depositQR.src = data.depositQR;
-
-      updateOverview(data);
-      loadTransactions(user.uid);
-      loadPortfolioChart(data);
-      loadLeaderboard();
-      loadChat();
-
-      if (!isAdmin) {
-        document.getElementById('admin').style.display = 'none';
-      }
-    });
-  });
-
 });

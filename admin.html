@@ -1,158 +1,134 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Neon(₿)Trade Dashboard</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Neon(₿)Trade — Admin Panel</title>
 <link rel="stylesheet" href="css/admin.css">
 
-<!-- Firebase SDK -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, addDoc, getDocs, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js"></script>
 
-  const firebaseConfig = {
-  apiKey: "AIzaSyDhyWz14XrUNdj1_M0bcY5kWblmtTVFNiU",
-  authDomain: "lumiinvest-3af48.firebaseapp.com",
-  projectId: "lumiinvest-3af48",
-  storageBucket: "lumiinvest-3af48.firebasestorage.app",
-  messagingSenderId: "708008740461",
-  appId: "1:708008740461:web:abd673a06c77ae29f52164"
-};
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth();
-  const db = getFirestore();
-  const storage = getStorage();
-
-  window.fbApp = { auth, db, storage }; // expose globally for admin.js
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="js/firebase-global.js" defer></script>
+<script src="js/admin.js" defer></script>
 </head>
 <body>
+<div class="admin-root">
 
-<!-- Sidebar Navigation -->
-<nav class="dashboard-nav">
-  <h2>Neon(₿)Trade</h2>
-  <button class="nav-btn" data-section="overview">Overview</button>
-  <button class="nav-btn" data-section="transactions">Transactions</button>
-  <button class="nav-btn" data-section="deposit">Deposit</button>
-  <button class="nav-btn" data-section="withdraw">Withdraw</button>
-  <button class="nav-btn" data-section="leaderboard">Leaderboard</button>
-  <button class="nav-btn" data-section="chat">Chat</button>
-  <button class="nav-btn" data-section="admin">Admin</button>
-  <button id="logout-btn">Logout</button>
-</nav>
-
-<!-- Main Content -->
-<main class="dashboard-main">
-
-  <!-- Overview -->
-  <section id="overview" class="dashboard-section active">
-    <h2>Dashboard Overview</h2>
-    <div class="overview-cards">
-      <div class="overview-card">
-        <h3>Active Investors</h3>
-        <p id="stat-investors">0</p>
-      </div>
-      <div class="overview-card">
-        <h3>Total Investment</h3>
-        <p id="stat-investment">$0.00</p>
-      </div>
-      <div class="overview-card">
-        <h3>Total Payout</h3>
-        <p id="stat-payout">$0.00</p>
+  <!-- Sidebar -->
+  <aside class="admin-sidebar">
+    <div class="admin-brand">
+      <img src="images/logo.png" alt="NeonT" class="logo">
+      <div class="brand-text">
+        <span class="title">Neon(₿)Trade Admin</span>
+        <small>Manage Platform</small>
       </div>
     </div>
-    <canvas id="portfolioChart"></canvas>
-  </section>
-
-  <!-- Transactions -->
-  <section id="transactions" class="dashboard-section">
-    <h2>Transactions</h2>
-    <table>
-      <thead>
-        <tr><th>ID</th><th>User</th><th>Type</th><th>Amount</th><th>Status</th></tr>
-      </thead>
-      <tbody id="transaction-tbody"></tbody>
-    </table>
-  </section>
-
-  <!-- Deposit -->
-  <section id="deposit" class="dashboard-section">
-    <h2>Deposit Settings</h2>
-    <form id="deposit-form">
-      <label for="deposit-qr-upload">Upload Deposit QR Code</label>
-      <input type="file" id="deposit-qr-upload" accept="image/*">
-      <img id="deposit-qr" src="" alt="Deposit QR Code">
-      <button type="submit">Update QR</button>
-    </form>
-  </section>
-
-  <!-- Withdraw -->
-  <section id="withdraw" class="dashboard-section">
-    <h2>Withdraw Requests</h2>
-    <table>
-      <thead>
-        <tr><th>ID</th><th>User</th><th>Amount</th><th>Status</th><th>Action</th></tr>
-      </thead>
-      <tbody id="withdraw-tbody"></tbody>
-    </table>
-  </section>
-
-  <!-- Leaderboard -->
-  <section id="leaderboard" class="dashboard-section">
-    <h2>Leaderboard</h2>
-    <label><input type="checkbox" id="toggle-leaderboard" checked> Enable Leaderboard</label>
-    <ul id="leaderboard-list"></ul>
-  </section>
-
-  <!-- Chat -->
-  <section id="chat" class="dashboard-section">
-    <h2>Client Chat</h2>
-    <div class="dashboard-chat">
-      <div id="chat-box"></div>
-      <div class="chat-input-wrapper">
-        <input type="text" id="chat-input" placeholder="Type a message...">
-        <button id="chat-send">Send</button>
-      </div>
+    <nav class="admin-nav">
+      <button class="nav-btn active" data-target="overview">Overview</button>
+      <button class="nav-btn" data-target="users">Users</button>
+      <button class="nav-btn" data-target="deposits">Deposits</button>
+      <button class="nav-btn" data-target="withdrawals">Withdrawals</button>
+      <button class="nav-btn" data-target="settings">Site Settings</button>
+      <button class="nav-btn" data-target="charts">Charts</button>
+    </nav>
+    <div class="sidebar-footer">
+      <button id="admin-logout" class="btn-ghost">Logout</button>
     </div>
-  </section>
+  </aside>
 
-  <!-- Admin Controls -->
-  <section id="admin" class="dashboard-section">
-    <h2>Admin Controls</h2>
-    <form id="admin-form">
-      <label for="social-whatsapp">WhatsApp URL</label>
-      <input type="text" id="social-whatsapp" placeholder="https://wa.me/...">
-      <label for="social-facebook">Facebook URL</label>
-      <input type="text" id="social-facebook" placeholder="https://facebook.com/...">
-      <label for="social-instagram">Instagram URL</label>
-      <input type="text" id="social-instagram" placeholder="https://instagram.com/...">
-      <label for="social-email">Support Email</label>
-      <input type="email" id="social-email" placeholder="my.developer@mail.com">
-      <button type="submit">Update Social Links</button>
-    </form>
+  <!-- Main content -->
+  <main class="admin-main">
+    <header class="admin-topbar">
+      <h1 id="page-title">Overview</h1>
+      <div class="admin-user">
+        <div id="admin-displayname">Admin</div>
+        <small id="admin-uid">—</small>
+      </div>
+    </header>
 
-    <form id="plan-form">
-      <label for="plan-select">Switch User Plan</label>
-      <select id="plan-select">
-        <option value="starter">Starter</option>
-        <option value="premium">Premium</option>
-        <option value="advance">Advance</option>
-        <option value="institutional">Proficient</option>
-      </select>
-      <button type="submit">Change Plan</button>
-    </form>
-  </section>
+    <section id="overview" class="admin-section active">
+      <h2>Platform Overview</h2>
+      <div class="cards-grid">
+        <div class="card">
+          <h3>Total Users</h3>
+          <div id="total-users">0</div>
+        </div>
+        <div class="card">
+          <h3>Total Deposits</h3>
+          <div id="total-deposits">0 USD</div>
+        </div>
+        <div class="card">
+          <h3>Total Withdrawals</h3>
+          <div id="total-withdrawals">0 USD</div>
+        </div>
+        <div class="card">
+          <h3>Leaderboard Active</h3>
+          <div id="leaderboard-status">—</div>
+          <button id="toggle-leaderboard" class="btn-small">Toggle Leaderboard</button>
+        </div>
+      </div>
+    </section>
 
-</main>
+    <section id="users" class="admin-section">
+      <h2>Users</h2>
+      <table class="admin-table">
+        <thead>
+          <tr><th>Name</th><th>Email</th><th>UID</th><th>Balance BTC</th><th>Balance USD</th><th>Plan</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="users-table-body">
+          <tr><td colspan="7">Loading...</td></tr>
+        </tbody>
+      </table>
+    </section>
 
-<div id="dt-snackbar"></div>
+    <section id="deposits" class="admin-section">
+      <h2>Pending Deposits</h2>
+      <table class="admin-table">
+        <thead>
+          <tr><th>User</th><th>Amount (BTC)</th><th>Plan</th><th>Status</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="deposits-table-body">
+          <tr><td colspan="5">Loading...</td></tr>
+        </tbody>
+      </table>
+    </section>
 
-<script type="module" src="js/admin.js"></script>
+    <section id="withdrawals" class="admin-section">
+      <h2>Pending Withdrawals</h2>
+      <table class="admin-table">
+        <thead>
+          <tr><th>User</th><th>Amount (USD)</th><th>Wallet</th><th>Status</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="withdraws-table-body">
+          <tr><td colspan="5">Loading...</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="settings" class="admin-section">
+      <h2>Site Settings</h2>
+      <div class="settings-grid">
+        <label>Upload Deposit QR Code</label>
+        <input type="file" id="upload-qr" accept="image/*">
+        <label>Social Buttons JSON</label>
+        <textarea id="social-json" rows="5">{"whatsapp":"#","facebook":"#","instagram":"#","email":"mailto:support@neontrade.com"}</textarea>
+        <button id="save-settings" class="btn-primary">Save Settings</button>
+      </div>
+    </section>
+
+    <section id="charts" class="admin-section">
+      <h2>Portfolio Chart</h2>
+      <canvas id="admin-portfolio-chart" height="200"></canvas>
+    </section>
+  </main>
+</div>
+<div id="admin-snackbar" class="snackbar hidden"></div>
 </body>
 </html>

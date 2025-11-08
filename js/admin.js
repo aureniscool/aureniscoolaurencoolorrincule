@@ -1,158 +1,89 @@
-// admin.js
-import { auth, db, storage } from './firebase-global.js'; // exposed from index
-
-import { 
-  onAuthStateChanged, signOut
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-
-import {
-  doc, getDoc, setDoc, updateDoc, collection, addDoc, getDocs, query, orderBy, limit
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
+import { auth, db, storage } from "./firebase-global.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { doc, getDoc, collection, onSnapshot, updateDoc, addDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
-document.addEventListener("DOMContentLoaded", () => {
-  const sections = document.querySelectorAll(".dashboard-section");
-  const navBtns = document.querySelectorAll(".nav-btn");
-  const logoutBtn = document.getElementById("logout-btn");
+onAuthStateChanged(auth, async user => {
+    if(!user) return window.location.href="login.html";
+    const adminRef = doc(db,"admins",user.uid);
+    const snap = await getDoc(adminRef);
+    if(!snap.exists()) return window.location.href="login.html";
 
-  // Sidebar nav
-  navBtns.forEach(btn => {
-    btn.addEventListener("click", () => {
-      sections.forEach(s => s.classList.remove("active"));
-      const section = document.getElementById(btn.dataset.section);
-      section.classList.add("active");
+    // Deposits
+    const depositsList = document.getElementById("admin-deposit-list");
+    onSnapshot(collection(db,"deposits"), snapDep=>{
+        depositsList.innerHTML = "";
+        snapDep.forEach(d=>{
+            const data = d.data();
+            const li = document.createElement("li");
+            li.innerHTML = `${data.name} — $${data.amount} — ${data.status} 
+            <button onclick="approveDeposit('${d.id}', ${data.amount})">Approve</button>`;
+            depositsList.appendChild(li);
+        });
     });
-  });
 
-  // Auth check
-  onAuthStateChanged(auth, user => {
-    if (!user) window.location.href = "login.html"; // redirect non-admin
-    // optionally, check custom claim for admin
-  });
+    window.approveDeposit = async (id, amount)=>{
+        const depRef = doc(db,"deposits",id);
+        const depSnap = await getDoc(depRef);
+        if(depSnap.exists()){
+            const uid = depSnap.data().uid;
+            const userRef = doc(db,"users",uid);
+            const userSnap = await getDoc(userRef);
+            const currentBalance = userSnap.data()?.balanceUSD || 0;
+            await updateDoc(userRef,{ balanceUSD: currentBalance+amount });
+            await updateDoc(depRef,{ status: "approved" });
+            alert("Deposit approved and balance updated");
+        }
+    };
 
-  logoutBtn.addEventListener("click", () => signOut(auth));
-
-  // Stats overview
-  async function loadStats() {
-    const docSnap = await getDoc(doc(db, "stats", "overview"));
-    if (docSnap.exists()) {
-      const data = docSnap.data();
-      document.getElementById("stat-investors").innerText = data.activeInvestors || 0;
-      document.getElementById("stat-investment").innerText = `$${data.totalInvestment || 0}`;
-      document.getElementById("stat-payout").innerText = `$${data.totalPayout || 0}`;
-      renderChart(data.portfolio || {});
-    }
-  }
-
-  // Portfolio Chart
-  function renderChart(portfolioData) {
-    const ctx = document.getElementById('portfolioChart').getContext('2d');
-    new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: Object.keys(portfolioData),
-        datasets: [{
-          label: 'Portfolio Distribution',
-          data: Object.values(portfolioData),
-          backgroundColor: '#0ff',
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: { legend: { display: true } }
-      }
+    // Withdrawals
+    const withdrawList = document.getElementById("admin-withdraw-list");
+    onSnapshot(collection(db,"withdrawals"), snapW=>{
+        withdrawList.innerHTML="";
+        snapW.forEach(d=>{
+            const data = d.data();
+            const li = document.createElement("li");
+            li.innerHTML = `${data.name} — $${data.amount} — ${data.status} 
+            <button onclick="approveWithdraw('${d.id}', ${data.amount})">Approve</button>`;
+            withdrawList.appendChild(li);
+        });
     });
-  }
 
-  // Leaderboard toggle
-  const toggleLeaderboard = document.getElementById("toggle-leaderboard");
-  toggleLeaderboard.addEventListener("change", async () => {
-    await setDoc(doc(db, "settings", "leaderboard"), { enabled: toggleLeaderboard.checked });
-  });
+    window.approveWithdraw = async (id, amount)=>{
+        const wRef = doc(db,"withdrawals",id);
+        const wSnap = await getDoc(wRef);
+        if(wSnap.exists()){
+            const uid = wSnap.data().uid;
+            const userRef = doc(db,"users",uid);
+            const userSnap = await getDoc(userRef);
+            const currentBalance = userSnap.data()?.balanceUSD || 0;
+            if(currentBalance<amount){ alert("Insufficient user balance"); return; }
+            await updateDoc(userRef,{ balanceUSD: currentBalance-amount });
+            await updateDoc(wRef,{ status: "approved" });
+            alert("Withdrawal approved and balance deducted");
+        }
+    };
 
-  async function loadLeaderboard() {
-    const leaderboardList = document.getElementById("leaderboard-list");
-    leaderboardList.innerHTML = "";
-    const q = query(collection(db, "leaderboard"), orderBy("total", "desc"), limit(10));
-    const snapshot = await getDocs(q);
-    snapshot.forEach(docSnap => {
-      const li = document.createElement("li");
-      const data = docSnap.data();
-      li.textContent = `${data.username} — $${data.total}`;
-      leaderboardList.appendChild(li);
+    // QR upload
+    const qrInput = document.getElementById("upload-qr");
+    qrInput?.addEventListener("change", async e=>{
+        const file = e.target.files[0];
+        if(!file) return;
+        const qrRef = ref(storage, "deposit-qr/"+file.name);
+        await uploadBytes(qrRef,file);
+        const url = await getDownloadURL(qrRef);
+        await updateDoc(doc(db,"adminControls","wallet"),{ qrURL:url });
+        alert("QR uploaded and set");
     });
-  }
 
-  // Chat system
-  const chatBox = document.getElementById("chat-box");
-  const chatInput = document.getElementById("chat-input");
-  const chatSend = document.getElementById("chat-send");
-
-  async function loadMessages() {
-    const q = query(collection(db, "chat"), orderBy("timestamp"));
-    const snapshot = await getDocs(q);
-    chatBox.innerHTML = "";
-    snapshot.forEach(docSnap => {
-      const msg = docSnap.data();
-      const div = document.createElement("div");
-      div.className = msg.fromAdmin ? "msg admin" : "msg client";
-      div.textContent = msg.text;
-      chatBox.appendChild(div);
+    // Leaderboard toggle
+    const lbToggle = document.getElementById("toggle-leaderboard");
+    lbToggle?.addEventListener("click", async ()=>{
+        const refDoc = doc(db,"adminControls","leaderboard");
+        const snap = await getDoc(refDoc);
+        const enabled = snap.exists()? snap.data().enabled : true;
+        await updateDoc(refDoc,{ enabled: !enabled });
+        alert(`Leaderboard now ${!enabled ? "enabled" : "disabled"}`);
     });
-    chatBox.scrollTop = chatBox.scrollHeight;
-  }
 
-  chatSend.addEventListener("click", async () => {
-    const text = chatInput.value.trim();
-    if (!text) return;
-    await addDoc(collection(db, "chat"), {
-      text,
-      fromAdmin: true,
-      timestamp: new Date()
-    });
-    chatInput.value = "";
-    loadMessages();
-  });
-
-  // QR upload
-  const qrInput = document.getElementById("deposit-qr-upload");
-  const qrImg = document.getElementById("deposit-qr");
-  qrInput.addEventListener("change", async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const qrRef = ref(storage, `deposit-qr/${file.name}`);
-    await uploadBytes(qrRef, file);
-    const url = await getDownloadURL(qrRef);
-    qrImg.src = url;
-    await setDoc(doc(db, "settings", "depositQR"), { url });
-  });
-
-  // Admin social form
-  const adminForm = document.getElementById("admin-form");
-  adminForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    await setDoc(doc(db, "settings", "socialLinks"), {
-      whatsapp: document.getElementById("social-whatsapp").value,
-      facebook: document.getElementById("social-facebook").value,
-      instagram: document.getElementById("social-instagram").value,
-      email: document.getElementById("social-email").value
-    });
-  });
-
-  // Plan change
-  const planForm = document.getElementById("plan-form");
-  planForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const plan = document.getElementById("plan-select").value;
-    const userId = prompt("Enter User ID to switch plan:");
-    if (!userId) return;
-    await updateDoc(doc(db, "users", userId), { plan });
-    alert(`User plan updated to ${plan}`);
-  });
-
-  // Initial load
-  loadStats();
-  loadLeaderboard();
-  loadMessages();
 });

@@ -1,89 +1,123 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Neon(₿)Trade — Dashboard</title>
-  <link rel="stylesheet" href="css/dashboard.css">
-  <link rel="icon" href="images/neontrade-logo.png" type="image/png">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Neon(₿)Trade — Dashboard</title>
+<link rel="stylesheet" href="css/dashboard.css">
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js"></script>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script src="js/firebase-global.js" defer></script>
+<script src="js/dashboard.js" defer></script>
 </head>
-<body class="dashboard-page">
+<body>
+<div class="dash-root">
 
-<header class="nt-header">
-  <div class="nt-header-inner">
-    <div class="nt-brand">
-      <img src="images/neontrade-logo.png" alt="NeonTrade" class="nt-logo">
-      <div class="nt-brand-text">
-        <div class="nt-brand-name">Neon(₿)Trade</div>
-        <div class="nt-tagline">Your Crypto Dashboard</div>
+  <aside class="dash-sidebar">
+    <div class="dash-brand">
+      <img src="images/logo.png" alt="NeonT" class="logo">
+      <div class="brand-text">
+        <span class="title">Neon(₿)Trade</span>
+        <small>Your NeonTrade Dashboard</small>
       </div>
     </div>
-    <nav class="nt-nav">
-      <a href="dashboard.html" class="nt-nav-link">Dashboard</a>
-      <a href="plans.html" class="nt-nav-link">Plans</a>
-      <a href="logout.html" class="nt-button nt-button-outline">Logout</a>
+    <nav class="dash-nav">
+      <button class="nav-btn active" data-target="overview">Overview</button>
+      <button class="nav-btn" data-target="plans">Plans</button>
+      <button class="nav-btn" data-target="portfolio">Portfolio</button>
+      <button class="nav-btn" data-target="referrals">Referrals</button>
+      <button class="nav-btn" data-target="deposit">Deposit</button>
+      <button class="nav-btn" data-target="withdraw">Withdraw</button>
+      <button class="nav-btn" data-target="settings">Settings</button>
     </nav>
-  </div>
-</header>
-
-<main class="nt-container">
-  <section class="nt-dashboard-overview">
-    <h2>Welcome, <span id="user-displayname">User</span>!</h2>
-    <div class="nt-stats-grid">
-      <div class="nt-stat-card">
-        <div class="nt-stat-number" id="btc-balance">0 BTC</div>
-        <div class="nt-stat-label">BTC Balance</div>
-      </div>
-      <div class="nt-stat-card">
-        <div class="nt-stat-number" id="btc-usd">0 USD</div>
-        <div class="nt-stat-label">USD Balance</div>
-      </div>
-      <div class="nt-stat-card">
-        <div class="nt-stat-number" id="ref-count">0</div>
-        <div class="nt-stat-label">Referrals</div>
-      </div>
+    <div class="sidebar-footer">
+      <button id="dash-logout" class="btn-ghost">Logout</button>
     </div>
-  </section>
+  </aside>
 
-  <section class="nt-active-plan">
-    <h3>Active Plan: <span id="active-plan-name">—</span></h3>
-    <p id="active-plan-details">Select a plan to start earning</p>
-  </section>
+  <main class="dash-main">
+    <header class="dash-topbar">
+      <h1 id="dash-page-title">Overview</h1>
+      <div class="dash-user">
+        <span id="dash-username">User</span>
+        <small id="dash-uid">—</small>
+      </div>
+    </header>
 
-  <section class="nt-wallet-section">
-    <div id="deposit-loader">Loading deposit info...</div>
-    <div id="deposit-wallet-block" class="hidden">
-      <h3>Deposit Wallet</h3>
-      <p id="deposit-wallet-address">—</p>
-      <button id="deposit-copy">Copy Wallet Address</button>
-      <form id="deposit-form">
-        <input type="number" id="deposit-amount" placeholder="Amount ($)">
-        <select id="deposit-plan">
-          <option value="starter">Starter</option>
-          <option value="premium">Premium</option>
-          <option value="advance">Advance</option>
-          <option value="institutional">Proficient</option>
-        </select>
-        <button type="submit" class="nt-button nt-button-primary">Deposit</button>
-      </form>
-      <button id="quick-deposit">Quick Deposit</button>
-    </div>
-  </section>
+    <section id="overview" class="dash-section active">
+      <h2>Welcome, <span id="overview-name">User</span>!</h2>
+      <div class="dash-cards-grid">
+        <div class="card">
+          <h3>BTC Balance</h3>
+          <div id="btc-balance">0 BTC</div>
+        </div>
+        <div class="card">
+          <h3>USD Balance</h3>
+          <div id="usd-balance">0 USD</div>
+        </div>
+        <div class="card">
+          <h3>Active Plan</h3>
+          <div id="active-plan">—</div>
+        </div>
+        <div class="card">
+          <h3>Referrals</h3>
+          <div id="referrals-count">0</div>
+        </div>
+      </div>
+    </section>
 
-  <section class="nt-withdraw">
-    <h3>Withdraw</h3>
-    <form id="withdraw-form">
-      <input type="text" id="withdraw-wallet" placeholder="Your BTC Wallet">
-      <input type="number" id="withdraw-amount" placeholder="Amount ($)">
-      <button type="submit" class="nt-button nt-button-primary">Withdraw</button>
-    </form>
-  </section>
+    <section id="plans" class="dash-section">
+      <h2>Select a Plan</h2>
+      <div class="plans-grid" id="plans-grid">
+        <!-- Filled dynamically from Firebase -->
+      </div>
+    </section>
 
-  <section class="nt-referral">
-    <h3>Your Referral Code: <span id="ref-code">—</span></h3>
-  </section>
-</main>
+    <section id="portfolio" class="dash-section">
+      <h2>Your Portfolio</h2>
+      <canvas id="portfolio-chart" height="200"></canvas>
+    </section>
 
-<script type="module" src="js/dashboard.js"></script>
+    <section id="referrals" class="dash-section">
+      <h2>Your Referral Code</h2>
+      <div id="referral-code">—</div>
+      <p>Share this code to earn commissions!</p>
+    </section>
+
+    <section id="deposit" class="dash-section">
+      <h2>Deposit</h2>
+      <div id="deposit-wallet">—</div>
+      <input type="number" id="deposit-amount" placeholder="BTC Amount">
+      <button id="deposit-btn" class="btn-primary">Send Deposit</button>
+    </section>
+
+    <section id="withdraw" class="dash-section">
+      <h2>Withdraw</h2>
+      <input type="number" id="withdraw-amount" placeholder="USD Amount">
+      <input type="text" id="withdraw-wallet" placeholder="Wallet Address">
+      <button id="withdraw-btn" class="btn-primary">Request Withdraw</button>
+    </section>
+
+    <section id="settings" class="dash-section">
+      <h2>Account Settings</h2>
+      <label>Profile Name</label>
+      <input type="text" id="dash-name">
+      <label>Email</label>
+      <input type="email" id="dash-email">
+      <button id="save-profile" class="btn-primary">Save Profile</button>
+    </section>
+
+  </main>
+</div>
+
+<div id="dash-snackbar" class="snackbar hidden"></div>
 </body>
 </html>
