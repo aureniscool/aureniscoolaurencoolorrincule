@@ -1,51 +1,86 @@
-document.addEventListener("DOMContentLoaded", function() {
+const firebaseConfig = {
+  apiKey: "AIzaSyDhyWz14XrUNdj1_M0bcY5kWblmtTVFNiU",
+  authDomain: "lumiinvest-3af48.firebaseapp.com",
+  projectId: "lumiinvest-3af48",
+  storageBucket: "lumiinvest-3af48.firebasestorage.app",
+  messagingSenderId: "708008740461",
+  appId: "1:708008740461:web:abd673a06c77ae29f52164"
+};
 
-  const loginForm = document.getElementById("loginForm");
-  const registerForm = document.getElementById("registerForm");
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
 
-  if (loginForm) {
-    loginForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const email = loginForm["email"].value;
-      const password = loginForm["password"].value;
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-      window.auth.signInWithEmailAndPassword(email, password)
-        .then((cred) => {
-          const user = cred.user;
-          window.db.collection("users").doc(user.uid).get()
-            .then(doc => {
-              if(doc.exists && doc.data().role === "admin") {
-                window.location.href = "admin.html";
-              } else {
-                window.location.href = "dashboard.html";
-              }
-            });
-        })
-        .catch((error) => alert(error.message));
-    });
-  }
+// ========== REGISTER ==========
+const registerForm = document.getElementById("registerForm");
+if (registerForm) {
+  registerForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-  if (registerForm) {
-    registerForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const email = registerForm["email"].value;
-      const password = registerForm["password"].value;
-      const fullname = registerForm["fullname"].value;
+    const fullName = document.getElementById("fullName").value;
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    const confirmPassword = document.getElementById("confirmPassword").value;
+    const country = document.getElementById("country").value;
+    const plan = document.getElementById("planSelect").value;
 
-      window.auth.createUserWithEmailAndPassword(email, password)
-        .then((cred) => {
-          const user = cred.user;
-          window.db.collection("users").doc(user.uid).set({
-            fullname: fullname,
-            email: email,
-            role: "user",
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-          }).then(() => {
-            window.location.href = "dashboard.html";
-          });
-        })
-        .catch((error) => alert(error.message));
-    });
-  }
+    if (password !== confirmPassword) {
+      alert("Passwords do not match!");
+      return;
+    }
 
-});
+    try {
+      const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+      const user = userCredential.user;
+
+      // Save user details in Firestore
+      await db.collection("users").doc(user.uid).set({
+        fullName,
+        email,
+        country,
+        plan,
+        role: "user", // default role
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+
+      alert("Account created successfully!");
+      window.location.href = "login.html";
+    } catch (error) {
+      alert(error.message);
+    }
+  });
+}
+
+// ========== LOGIN ==========
+const loginForm = document.getElementById("loginForm");
+if (loginForm) {
+  loginForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const email = loginForm.email.value;
+    const password = loginForm.password.value;
+
+    try {
+      const userCredential = await auth.signInWithEmailAndPassword(email, password);
+      const user = userCredential.user;
+
+      // get user role
+      const doc = await db.collection("users").doc(user.uid).get();
+      if (doc.exists) {
+        const data = doc.data();
+        if (data.role === "admin") {
+          window.location.href = "admin.html";
+        } else {
+          window.location.href = "dashboard.html";
+        }
+      } else {
+        alert("User data not found.");
+      }
+    } catch (error) {
+      alert(error.message);
+    }
+  });
+}
