@@ -1,134 +1,149 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Neon(₿)Trade — Admin Panel</title>
-<link rel="stylesheet" href="css/admin.css">
-
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js"></script>
-
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-
-<script src="js/firebase-global.js" defer></script>
-<script src="js/admin.js" defer></script>
+<title>NeonTrade Admin Dashboard</title>
+<link rel="stylesheet" href="admin.css">
+<link rel="icon" href="images/neontrade-logo.png" type="image/png">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body>
-<div class="admin-root">
+<body class="admin-page">
 
+<div class="admin-root">
   <!-- Sidebar -->
   <aside class="admin-sidebar">
     <div class="admin-brand">
-      <img src="images/logo.png" alt="NeonT" class="logo">
-      <div class="brand-text">
-        <span class="title">Neon(₿)Trade Admin</span>
-        <small>Manage Platform</small>
-      </div>
+      <img src="images/neontrade-logo.png" alt="Logo" class="admin-logo">
+      <div class="admin-title">Neon(₿)Trade</div>
     </div>
     <nav class="admin-nav">
-      <button class="nav-btn active" data-target="overview">Overview</button>
-      <button class="nav-btn" data-target="users">Users</button>
-      <button class="nav-btn" data-target="deposits">Deposits</button>
-      <button class="nav-btn" data-target="withdrawals">Withdrawals</button>
-      <button class="nav-btn" data-target="settings">Site Settings</button>
-      <button class="nav-btn" data-target="charts">Charts</button>
+      <button class="nav-btn active" data-section="overview">Overview</button>
+      <button class="nav-btn" data-section="users">Users</button>
+      <button class="nav-btn" data-section="deposits">Deposits</button>
+      <button class="nav-btn" data-section="withdrawals">Withdrawals</button>
+      <button class="nav-btn" data-section="plans">Plans</button>
+      <button class="nav-btn" data-section="social">Social Buttons</button>
+      <button class="nav-btn" data-section="leaderboard">Leaderboard</button>
+      <button class="nav-btn" data-section="qr">QR Upload</button>
+      <button class="nav-btn" data-section="charts">Portfolio Stats</button>
     </nav>
     <div class="sidebar-footer">
-      <button id="admin-logout" class="btn-ghost">Logout</button>
+      <button id="logout-btn" class="btn-ghost">Logout</button>
     </div>
   </aside>
 
-  <!-- Main content -->
+  <!-- Main -->
   <main class="admin-main">
     <header class="admin-topbar">
-      <h1 id="page-title">Overview</h1>
-      <div class="admin-user">
-        <div id="admin-displayname">Admin</div>
-        <small id="admin-uid">—</small>
-      </div>
+      <h2 class="page-title">Admin Dashboard</h2>
     </header>
+    <div class="admin-content">
 
-    <section id="overview" class="admin-section active">
-      <h2>Platform Overview</h2>
-      <div class="cards-grid">
+      <!-- Overview -->
+      <section class="admin-section active" id="overview">
         <div class="card">
-          <h3>Total Users</h3>
-          <div id="total-users">0</div>
+          <h3>Platform Overview</h3>
+          <p>Total Users: <span id="total-users">0</span></p>
+          <p>Total BTC Deposited: <span id="total-btc">0</span></p>
+          <p>Total USD Deposited: <span id="total-usd">0</span></p>
         </div>
+      </section>
+
+      <!-- Users -->
+      <section class="admin-section" id="users">
         <div class="card">
-          <h3>Total Deposits</h3>
-          <div id="total-deposits">0 USD</div>
+          <h3>Users List</h3>
+          <table class="dt-table">
+            <thead>
+              <tr><th>UID</th><th>Name</th><th>BTC</th><th>USD</th><th>Active Plan</th></tr>
+            </thead>
+            <tbody id="users-list"></tbody>
+          </table>
         </div>
+      </section>
+
+      <!-- Deposits -->
+      <section class="admin-section" id="deposits">
         <div class="card">
-          <h3>Total Withdrawals</h3>
-          <div id="total-withdrawals">0 USD</div>
+          <h3>Pending Deposits</h3>
+          <table class="dt-table">
+            <thead>
+              <tr><th>User</th><th>Amount (BTC)</th><th>Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="deposits-list"></tbody>
+          </table>
         </div>
+      </section>
+
+      <!-- Withdrawals -->
+      <section class="admin-section" id="withdrawals">
         <div class="card">
-          <h3>Leaderboard Active</h3>
-          <div id="leaderboard-status">—</div>
-          <button id="toggle-leaderboard" class="btn-small">Toggle Leaderboard</button>
+          <h3>Pending Withdrawals</h3>
+          <table class="dt-table">
+            <thead>
+              <tr><th>User</th><th>Amount (BTC)</th><th>Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="withdrawals-list"></tbody>
+          </table>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section id="users" class="admin-section">
-      <h2>Users</h2>
-      <table class="admin-table">
-        <thead>
-          <tr><th>Name</th><th>Email</th><th>UID</th><th>Balance BTC</th><th>Balance USD</th><th>Plan</th><th>Actions</th></tr>
-        </thead>
-        <tbody id="users-table-body">
-          <tr><td colspan="7">Loading...</td></tr>
-        </tbody>
-      </table>
-    </section>
+      <!-- Plans -->
+      <section class="admin-section" id="plans">
+        <div class="card">
+          <h3>Manage Plans</h3>
+          <div id="plans-list"></div>
+          <button id="add-plan-btn" class="btn-primary">Add New Plan</button>
+        </div>
+      </section>
 
-    <section id="deposits" class="admin-section">
-      <h2>Pending Deposits</h2>
-      <table class="admin-table">
-        <thead>
-          <tr><th>User</th><th>Amount (BTC)</th><th>Plan</th><th>Status</th><th>Actions</th></tr>
-        </thead>
-        <tbody id="deposits-table-body">
-          <tr><td colspan="5">Loading...</td></tr>
-        </tbody>
-      </table>
-    </section>
+      <!-- Social Buttons -->
+      <section class="admin-section" id="social">
+        <div class="card">
+          <h3>Update Social Buttons</h3>
+          <div class="form-inline">
+            <label>WhatsApp URL<input type="text" id="social-whatsapp"></label>
+            <label>Facebook URL<input type="text" id="social-facebook"></label>
+            <label>Instagram URL<input type="text" id="social-instagram"></label>
+            <label>Email<input type="text" id="social-email"></label>
+            <button id="save-social-btn" class="btn-primary">Save</button>
+          </div>
+        </div>
+      </section>
 
-    <section id="withdrawals" class="admin-section">
-      <h2>Pending Withdrawals</h2>
-      <table class="admin-table">
-        <thead>
-          <tr><th>User</th><th>Amount (USD)</th><th>Wallet</th><th>Status</th><th>Actions</th></tr>
-        </thead>
-        <tbody id="withdraws-table-body">
-          <tr><td colspan="5">Loading...</td></tr>
-        </tbody>
-      </table>
-    </section>
+      <!-- Leaderboard Toggle -->
+      <section class="admin-section" id="leaderboard">
+        <div class="card">
+          <h3>Leaderboard Settings</h3>
+          <label>
+            <input type="checkbox" id="toggle-leaderboard"> Enable Leaderboard
+          </label>
+        </div>
+      </section>
 
-    <section id="settings" class="admin-section">
-      <h2>Site Settings</h2>
-      <div class="settings-grid">
-        <label>Upload Deposit QR Code</label>
-        <input type="file" id="upload-qr" accept="image/*">
-        <label>Social Buttons JSON</label>
-        <textarea id="social-json" rows="5">{"whatsapp":"#","facebook":"#","instagram":"#","email":"mailto:support@neontrade.com"}</textarea>
-        <button id="save-settings" class="btn-primary">Save Settings</button>
-      </div>
-    </section>
+      <!-- QR Upload -->
+      <section class="admin-section" id="qr">
+        <div class="card">
+          <h3>Upload Deposit QR Code</h3>
+          <input type="file" id="qr-upload">
+          <button id="save-qr-btn" class="btn-primary">Upload</button>
+          <div id="qr-preview" class="mt-2"></div>
+        </div>
+      </section>
 
-    <section id="charts" class="admin-section">
-      <h2>Portfolio Chart</h2>
-      <canvas id="admin-portfolio-chart" height="200"></canvas>
-    </section>
+      <!-- Charts -->
+      <section class="admin-section" id="charts">
+        <div class="card">
+          <h3>Portfolio Charts</h3>
+          <canvas id="portfolio-chart" height="150"></canvas>
+        </div>
+      </section>
+
+    </div>
   </main>
 </div>
-<div id="admin-snackbar" class="snackbar hidden"></div>
+
+<script type="module" src="admin.js"></script>
 </body>
 </html>
