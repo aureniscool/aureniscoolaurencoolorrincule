@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Account | Neon(₿)Trade</title>
+  <link rel="stylesheet" href="css/auth.css">
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-box">
+      <h2>Create Account</h2>
+      <p>Join Neon(₿)Trade and start your crypto investment journey today.</p>
+
+      <form id="registerForm">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="fullName" placeholder="Enter your full name" required>
+        </div>
+
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="email" placeholder="Enter your email" required>
+        </div>
+
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="password" placeholder="Enter a secure password" required>
+        </div>
+
+        <div class="form-group">
+          <label>Confirm Password</label>
+          <input type="password" id="confirmPassword" placeholder="Confirm your password" required>
+        </div>
+
+        <div class="form-group">
+          <label>Country</label>
+          <input list="countryList" id="country" placeholder="Select or type your country" required>
+          <datalist id="countryList">
+            <!-- North America -->
+            <option value="United States">
+            <option value="Canada">
+            <option value="Mexico">
+            <option value="Greenland">
+            <option value="Bermuda">
+
+            <!-- European Union -->
+            <option value="Austria">
+            <option value="Belgium">
+            <option value="Bulgaria">
+            <option value="Croatia">
+            <option value="Cyprus">
+            <option value="Czech Republic">
+            <option value="Denmark">
+            <option value="Estonia">
+            <option value="Finland">
+            <option value="France">
+            <option value="Germany">
+            <option value="Greece">
+            <option value="Hungary">
+            <option value="Ireland">
+            <option value="Italy">
+            <option value="Latvia">
+            <option value="Lithuania">
+            <option value="Luxembourg">
+            <option value="Malta">
+            <option value="Netherlands">
+            <option value="Poland">
+            <option value="Portugal">
+            <option value="Romania">
+            <option value="Slovakia">
+            <option value="Slovenia">
+            <option value="Spain">
+            <option value="Sweden">
+            <option value="Norway">
+            <option value="Switzerland">
+            <option value="United Kingdom">
+          </datalist>
+        </div>
+
+        <div class="form-group">
+          <label>Investment Plan</label>
+          <select id="planSelect" required>
+            <option value="">Select a Plan</option>
+            <option value="starter">Starter (3.5% Daily - 7 days)</option>
+            <option value="premium">Premium (6.2% Daily - 14 days)</option>
+            <option value="advance">Advance (9.5% Daily - 21 days)</option>
+            <option value="proficient">Proficient (12.5% Daily - 30 days)</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn-register">Create Account</button>
+      </form>
+
+      <p class="alt-link">Already have an account? <a href="login.html">Login here</a></p>
+    </div>
+  </div>
+
+  <script type="module" src="/js/firebase-init.js"></script>
+  <script type="module" src="auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Neon(₿)Trade — Admin Panel</title>
+
+  <!-- Firebase (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <link rel="stylesheet" href="/css/admin.css">
+  <script src="/js/firebase-init.js" defer></script>
+  <script src="/js/admin.js" defer></script>
+</head>
+<body>
+  <div class="admin-root">
+
+    <aside class="admin-sidebar">
+      <div class="logo">
+        <img src="/images/logo.png" alt="logo" style="width:48px">
+        <h2>Neon Admin</h2>
+      </div>
+      <nav class="admin-nav">
+        <button class="adm-nav-btn active" data-target="adm-dashboard">Dashboard</button>
+        <button class="adm-nav-btn" data-target="adm-users">Users</button>
+        <button class="adm-nav-btn" data-target="adm-trans">Transactions</button>
+        <button class="adm-nav-btn" data-target="adm-settings">Settings</button>
+        <button class="adm-nav-btn" data-target="adm-logs">Activity Log</button>
+      </nav>
+      <div class="admin-footer">
+        <button id="admin-logout" class="btn-ghost">Logout</button>
+      </div>
+    </aside>
+
+    <div class="admin-main">
+      <header class="admin-topbar">
+        <h1 id="admin-title">Admin Dashboard</h1>
+        <div id="admin-summary">
+          <span id="total-users">Users: 0</span>
+          <span id="total-deposits">Deposits: $0</span>
+          <span id="total-withdrawals">Withdrawals: $0</span>
+        </div>
+      </header>
+
+      <main class="admin-content">
+        <section id="adm-dashboard" class="adm-section active">
+          <div class="panel">
+            <h3>Overview</h3>
+            <canvas id="overviewChart" height="120"></canvas>
+          </div>
+        </section>
+
+        <section id="adm-users" class="adm-section">
+          <div class="panel">
+            <h3>Users</h3>
+            <table class="table" id="users-table">
+              <thead><tr><th>UID</th><th>Name</th><th>Email</th><th>Plan</th><th>BTC Balance</th><th>Actions</th></tr></thead>
+              <tbody id="users-table-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="adm-trans" class="adm-section">
+          <div class="panel">
+            <h3>Transactions (Pending)</h3>
+            <table class="table" id="transactions-table">
+              <thead><tr><th>TXID</th><th>User</th><th>Type</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="transactions-table-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="adm-settings" class="adm-section">
+          <div class="panel">
+            <h3>Site Settings</h3>
+            <label>BTC Wallet (text)</label>
+            <input id="admin-btc-wallet" placeholder="1A...">
+            <label>Upload QR (png)</label>
+            <input type="file" id="admin-qr-file">
+            <label>Leaderboard Enabled</label>
+            <input type="checkbox" id="admin-leaderboard">
+            <label>Social - Whatsapp</label>
+            <input id="admin-wa" placeholder="+123">
+            <label>Social - Instagram</label>
+            <input id="admin-insta" placeholder="https://">
+            <label>Social - Facebook</label>
+            <input id="admin-fb" placeholder="https://">
+            <label>Support Email</label>
+            <input id="admin-email" placeholder="support@neon.local">
+            <button id="save-settings" class="btn-admin">Save Settings</button>
+          </div>
+        </section>
+
+        <section id="adm-logs" class="adm-section">
+          <div class="panel">
+            <h3>Admin Logs</h3>
+            <table class="table" id="admin-logs-table">
+              <thead><tr><th>Time</th><th>Action</th><th>Meta</th></tr></thead>
+              <tbody id="admin-logs-body"></tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+    </div>
+
+  </div>
+</body>
+</html>

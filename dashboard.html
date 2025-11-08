@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Neon(₿)Trade — Dashboard</title>
+
+  <!-- Firebase (compat) - required for firebase-init.js to use compat APIs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-storage-compat.js"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="/css/dashboard.css">
+
+  <!-- firebase-init MUST run first and set window._NEON = { auth, db, storage, app } -->
+  <script src="/js/firebase-init.js" defer></script>
+  <script src="/js/dashboard.js" defer></script>
+</head>
+<body>
+  <div class="dt-root">
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="dt-sidebar" id="sidebar">
+      <div class="dt-brand">
+        <img src="/images/logo.png" alt="NeonT" class="dt-logo">
+        <div class="dt-brand-text">
+          <span class="title">Neon(₿)Trade</span>
+          <small class="tag">Glow in the Market</small>
+        </div>
+      </div>
+
+      <nav class="dt-nav" id="nav">
+        <button class="dt-nav-btn active" data-target="overview">Overview</button>
+        <button class="dt-nav-btn" data-target="transactions">Transactions</button>
+        <button class="dt-nav-btn" data-target="deposit">Deposit</button>
+        <button class="dt-nav-btn" data-target="withdraw">Withdraw</button>
+        <button class="dt-nav-btn" data-target="leaderboard">Leaderboard</button>
+        <button class="dt-nav-btn" data-target="tutorial">Tutorial</button>
+        <button class="dt-nav-btn" data-target="referral">Referral</button>
+      </nav>
+
+      <div class="dt-sidebar-footer">
+        <button id="btn-logout" class="btn-ghost">Logout</button>
+      </div>
+    </aside>
+
+    <!-- TOPBAR + CONTENT -->
+    <div class="dt-main">
+
+      <!-- topbar -->
+      <header class="dt-topbar">
+        <div class="dt-topbar-left">
+          <h1 class="page-title" id="page-title">Overview</h1>
+        </div>
+        <div class="dt-topbar-right">
+          <div class="wallet-block">
+            <small>BTC Wallet</small>
+            <div class="wallet-row">
+              <div id="wallet-loader" class="wallet-loader">Preparing wallet...</div>
+              <div id="wallet-address" class="wallet-address hidden"></div>
+              <button id="btn-copy-wallet" class="btn-small">Copy</button>
+            </div>
+          </div>
+
+          <div class="profile-block">
+            <img src="/images/user-avatar.png" alt="avatar" class="avatar" id="user-avatar">
+            <div class="profile-info">
+              <div id="user-displayname">User</div>
+              <small id="user-display-uid">—</small>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- content area -->
+      <main class="dt-content">
+
+        <!-- OVERVIEW -->
+        <section id="overview" class="dt-section active">
+          <div class="grid grid-2-3">
+
+            <!-- left column: stats + charts -->
+            <div class="col">
+              <div class="card stats-row">
+                <div class="stat">
+                  <small>Total Balance (BTC)</small>
+                  <h2 id="btc-balance">— BTC</h2>
+                  <small id="btc-usd">— USD</small>
+                </div>
+                <div class="stat">
+                  <small>NeonT Balance</small>
+                  <h2 id="neont-balance">—</h2>
+                  <small id="neont-usd">— USD</small>
+                </div>
+                <div class="stat">
+                  <small>Daily Profit</small>
+                  <h2 id="daily-profit">—</h2>
+                  <small>Last 24h</small>
+                </div>
+                <div class="stat">
+                  <small>Total Profit</small>
+                  <h2 id="total-profit">—</h2>
+                  <small>Since join</small>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-head">
+                  <h3>Portfolio Performance</h3>
+                  <small id="chart-range-label">All time</small>
+                </div>
+                <canvas id="portfolioChart" height="160"></canvas>
+              </div>
+
+              <div class="card">
+                <h3>Active Plan</h3>
+                <div id="active-plan-card" class="plan-card">
+                  <div class="plan-name" id="active-plan-name">No Active Plan</div>
+                  <div class="plan-details" id="active-plan-details">Select a plan to start earning</div>
+                  <div class="plan-actions">
+                    <button id="select-plan-btn" class="btn-primary">Select Plan</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- right column: widgets -->
+            <aside class="col-right">
+              <div class="card">
+                <h3>AI Mining</h3>
+                <div class="ai-widget">
+                  <img src="/images/coin-widget.png" alt="coin" class="coin-img">
+                  <div>
+                    <div class="ai-rate" id="ai-rate">Generating...</div>
+                    <small>AI-enhanced mining simulation</small>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <h3>Leaderboard</h3>
+                <ol id="leaderboardList" class="leaderboard-list">
+                  <li>Loading...</li>
+                </ol>
+              </div>
+
+              <div class="card">
+                <h3>Referral</h3>
+                <div class="referral-box">
+                  <div id="referral-code" class="ref-code">—</div>
+                  <small>Share this code to earn 10% commission</small>
+                </div>
+              </div>
+
+              <div class="card">
+                <h3>Quick Actions</h3>
+                <div class="actions">
+                  <button id="quick-deposit" class="btn-primary">Deposit</button>
+                  <button id="quick-withdraw" class="btn-outline">Withdraw</button>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <!-- TRANSACTIONS -->
+        <section id="transactions" class="dt-section">
+          <div class="card">
+            <h3>Transaction History</h3>
+            <table class="dt-table">
+              <thead>
+                <tr><th>Date</th><th>Type</th><th>Amount</th><th>Status</th><th>Admin</th></tr>
+              </thead>
+              <tbody id="tx-table-body">
+                <tr><td colspan="5">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- DEPOSIT -->
+        <section id="deposit" class="dt-section">
+          <div class="card">
+            <h3>Deposit BTC</h3>
+            <p>Send BTC to the displayed wallet. You`ll be credited upon confirmation (may take up to two minutes to confirm and you will be credited Asap).</p>
+
+            <div class="deposit-box">
+              <div id="deposit-loader" class="wallet-loader">Preparing wallet...</div>
+
+              <div id="deposit-wallet-block" class="deposit-wallet hidden">
+                <div class="wallet-row">
+                  <div id="deposit-wallet-address" class="wallet-address monospace">—</div>
+                  <button id="deposit-copy" class="btn-small">Copy</button>
+                </div>
+                <img id="deposit-qr" src="/images/deposit-qr-placeholder.png" alt="QR" class="deposit-qr">
+              </div>
+
+              <form id="deposit-form" class="form-inline">
+                <label>Amount (USD)</label>
+                <input id="deposit-amount" type="number" min="1" placeholder="100">
+                <label>Choose Plan</label>
+                <select id="deposit-plan">
+                  <option value="starter">Starter — 3.5% Daily (Min $100)</option>
+                  <option value="premium">Premium — 6.2% Daily (Min $1,000)</option>
+                  <option value="advance">Advance — 9.5% Daily (Min $5,000)</option>
+                  <option value="institutional">Proficient — 12.5% Daily (Min $10,000)</option>
+                </select>
+                <button class="btn-primary" id="Request-Deposit">Confirm Depositt</button>
+              </form>
+            </div>
+          </div>
+        </section>
+
+        <!-- WITHDRAW -->
+        <section id="withdraw" class="dt-section">
+          <div class="card">
+            <h3>Withdraw</h3>
+            <p>Fill in your correct credential and you will be credited asap(Max 3 min)</p>
+            <form id="withdraw-form" class="form-vertical">
+              <label>Amount (USD)</label>
+              <input id="withdraw-amount" type="number" placeholder="100">
+              <label>Wallet Address</label>
+              <input id="withdraw-wallet" type="text" placeholder="Your BTC wallet address">
+              <button class="btn-primary" id="withdraw-submit">Withdraw Now</button>
+            </form>
+          </div>
+        </section>
+
+        <!-- LEADERBOARD -->
+        <section id="leaderboard" class="dt-section">
+          <div class="card">
+            <h3>Leaderboard (Top investors)</h3>
+            <ol id="leaderboard-full-list"></ol>
+          </div>
+        </section>
+
+        <!-- TUTORIAL -->
+        <section id="tutorial" class="dt-section">
+          <div class="card">
+            <h3>How to deposit BTC — Quick tutorial</h3>
+            <ol>
+              <li>Open your wallet (Coinbase, Binance, Trust Wallet etc.)</li>
+              <li>Copy the deposit address or scan the QR</li>
+              <li>Send exact amount — fee depends on network</li>
+              <li>Wait for confirmations — admin will verify and credit you</li>
+            </ol>
+          </div>
+        </section>
+
+        <!-- REFERRAL -->
+        <section id="referral" class="dt-section">
+          <div class="card">
+            <h3>Your referral link & stats</h3>
+            <div id="ref-stats">
+              <p>Code: <strong id="ref-code">—</strong></p>
+              <p>Referrals: <span id="ref-count">0</span></p>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- lightweight modal for alerts -->
+  <div id="dt-snackbar" class="snackbar hidden"></div>
+</body>
+</html>

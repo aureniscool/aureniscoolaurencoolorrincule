@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Neon(₿)Trade — Glow in the Market. Rise with Bitcoin</title>
+
+  <!-- main homepage styles (scoped to body.home-page so it won't break auth/dashboard) -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <link rel="icon" href="images/neontrade-logo.png" type="image/png" />
+</head>
+<body class="home-page">
+
+  <!-- Floating Help Button -->
+  <div class="nt-floating-help" aria-hidden="false">
+    <button id="nt-help-btn" class="nt-help-btn" title="How can we assist you?">
+      <img src="images/help-icon.png" alt="" class="nt-help-icon">
+      <span class="nt-help-text">How can we assist you?</span>
+    </button>
+  </div>
+
+  <!-- Social vertical -->
+  <div class="nt-social-vertical">
+    <a href="#" title="WhatsApp"><img src="images/whatsapp.png" alt="WhatsApp"></a>
+    <a href="#" title="Facebook"><img src="images/facebook.png" alt="Facebook"></a>
+    <a href="#" title="Instagram"><img src="images/instagram.png" alt="Instagram"></a>
+    <a href="mailto:support@neontrade.com" title="Email"><img src="images/email.png" alt="Email"></a>
+  </div>
+
+  <!-- NAV -->
+  <header class="nt-header">
+    <div class="nt-header-inner">
+      <div class="nt-brand">
+        <img src="images/neontrade-logo.png" alt="NeonTrade" class="nt-logo">
+        <div class="nt-brand-text">
+          <div class="nt-brand-name">Neon(₿)Trade</div>
+          <div class="nt-tagline">Glow in the Market. Rise with Bitcoin</div>
+        </div>
+      </div>
+
+      <nav class="nt-nav">
+        <a href="index.html" class="nt-nav-link">Home</a>
+        <a href="about.html" class="nt-nav-link">About</a>
+        <a href="plans.html" class="nt-nav-link">Plans</a>
+        <a href="contact.html" class="nt-nav-link">Contact</a>
+        <a href="login.html" class="nt-button nt-button-ghost">Login</a>
+        <a href="register.html" class="nt-button nt-button-primary">Register</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HERO — slideshow, full width -->
+  <section class="nt-hero">
+    <div class="nt-hero-slides">
+      <div class="nt-hero-slide" style="background-image:url('images/hero1.jpg')" data-index="0">
+        <div class="nt-hero-overlay"></div>
+        <div class="nt-hero-inner">
+          <h1>Invest in Crypto with Confidence</h1>
+          <p>Neon(₿)Trade merges AI-driven strategies with transparent blockchain records — your gateway to intelligent crypto growth.</p>
+          <div class="nt-hero-ctas">
+            <a class="nt-button nt-button-primary" href="register.html">Get Started</a>
+            <a class="nt-button nt-button-outline" href="plans.html">See Plans</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="nt-hero-slide" style="background-image:url('images/hero2.jpg')" data-index="1">
+        <div class="nt-hero-overlay"></div>
+        <div class="nt-hero-inner">
+          <h1>Smart. Secure. Profitable.</h1>
+          <p>Our AI and risk engine analyze millions of signals to optimize yield while enforcing strict safety controls.</p>
+          <div class="nt-hero-ctas">
+            <a class="nt-button nt-button-primary" href="register.html">Join NeonTrade</a>
+            <a class="nt-button nt-button-outline" href="contact.html">Contact Support</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="nt-hero-slide" style="background-image:url('images/hero3.jpg')" data-index="2">
+        <div class="nt-hero-overlay"></div>
+        <div class="nt-hero-inner">
+          <h1>AI-Driven Mining & Automated Investment</h1>
+          <p>Let our platform work for you 24/7 — automatic reallocations and reinvests designed to compound growth.</p>
+          <div class="nt-hero-ctas">
+            <a class="nt-button nt-button-primary" href="plans.html">Explore Plans</a>
+            <a class="nt-button nt-button-outline" href="about.html">Learn More</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- hero nav -->
+      <div class="nt-hero-dots" id="nt-hero-dots"></div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="nt-stats section-bg" aria-label="active-stats" style="">
+    <div class="nt-container">
+      <div class="nt-stats-grid">
+        <div class="nt-stat-card">
+          <div class="nt-stat-number">733</div>
+          <div class="nt-stat-label">Active Investors</div>
+        </div>
+        <div class="nt-stat-card">
+          <div class="nt-stat-number">$1,837,244.00</div>
+          <div class="nt-stat-label">Total Investment</div>
+        </div>
+        <div class="nt-stat-card">
+          <div class="nt-stat-number">$6,282,138.84</div>
+          <div class="nt-stat-label">Total Payout</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHY US -->
+  <section class="nt-why section-bg" style="background-image:url('images/support-bg.jpg')">
+    <div class="nt-container">
+      <h2>Why Neon(₿)Trade?</h2>
+      <div class="nt-why-grid">
+        <div class="nt-why-item">
+          <div class="nt-why-ico">⚡</div>
+          <h3>Speedy Withdrawals</h3>
+          <p>Fast processing and transparent logs — your funds move swiftly once approved by Our Team.</p>
+        </div>
+        <div class="nt-why-item">
+          <div class="nt-why-ico">🔒</div>
+          <h3>Bank-Level Security</h3>
+          <p>End-to-end encryption, secure cloud storage and best-in-class authentication to keep your account safe.</p>
+        </div>
+        <div class="nt-why-item">
+          <div class="nt-why-ico">🤖</div>
+          <h3>AI Optimization</h3>
+          <p>Adaptive trading strategies that learn market behavior — built to maximize long-term gains.</p>
+        </div>
+        <div class="nt-why-item">
+          <div class="nt-why-ico">📊</div>
+          <h3>Transparent Reporting</h3>
+          <p>Detailed transaction logs, daily accrual breakdowns, and easy tax/export options for your records.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- INVESTMENT PLANS -->
+  <section class="nt-plans section-bg" style="background-image:url('images/plans-bg.jpg')">
+    <div class="nt-container">
+      <h2>Investment Plans</h2>
+      <p class="nt-lead">Pick a strategy — conservative or aggressive. All plans include principal and daily payouts per plan terms.</p>
+
+      <div class="nt-plans-grid">
+        <!-- Starter -->
+        <article class="nt-plan-card">
+          <div class="nt-plan-head">
+            <h3>Starter — Beginner</h3>
+            <div class="nt-plan-rate">3.5% <small>Daily</small></div>
+          </div>
+          <div class="nt-plan-body">
+            <p>Duration: 7 days</p>
+            <ul>
+              <li>Min Deposit — $100</li>
+              <li>Max Deposit — $999</li>
+              <li>Principal Included • Instant Withdraw</li>
+            </ul>
+            <a class="nt-button nt-button-primary" href="register.html?plan=starter">Select Starter</a>
+          </div>
+        </article>
+
+        <!-- Premium -->
+        <article class="nt-plan-card popular">
+          <div class="nt-plan-head">
+            <h3>Premium — Popular</h3>
+            <div class="nt-plan-rate">6.2% <small>Daily</small></div>
+          </div>
+          <div class="nt-plan-body">
+            <p>Duration: 14 days</p>
+            <ul>
+              <li>Min Deposit — $1,000</li>
+              <li>Max Deposit — $4,999</li>
+              <li>Principal Included • Instant Withdraw</li>
+            </ul>
+            <a class="nt-button nt-button-primary" href="register.html?plan=premium">Select Premium</a>
+          </div>
+        </article>
+
+        <!-- Advance -->
+        <article class="nt-plan-card">
+          <div class="nt-plan-head">
+            <h3>Advance — Pro</h3>
+            <div class="nt-plan-rate">9.5% <small>Daily</small></div>
+          </div>
+          <div class="nt-plan-body">
+            <p>Duration: 21 days</p>
+            <ul>
+              <li>Min Deposit — $5,000</li>
+              <li>Max Deposit — $9,999</li>
+              <li>Principal Included • Instant Withdraw</li>
+            </ul>
+            <a class="nt-button nt-button-primary" href="register.html?plan=advance">Select Advance</a>
+          </div>
+        </article>
+
+        <!-- Proficient -->
+        <article class="nt-plan-card">
+          <div class="nt-plan-head">
+            <h3>Proficient — Institutional</h3>
+            <div class="nt-plan-rate">12.5% <small>Daily</small></div>
+          </div>
+          <div class="nt-plan-body">
+            <p>Duration: 30 days</p>
+            <ul>
+              <li>Min Deposit — $10,000</li>
+              <li>Max Deposit — Unlimited</li>
+              <li>Principal Included • Priority Support</li>
+            </ul>
+            <a class="nt-button nt-button-primary" href="register.html?plan=institutional">Select Proficient</a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- AFFILIATE COMMISSION -->
+  <section class="nt-affiliate section-bg" style="background-image:url('images/support-bg.jpg')">
+    <div class="nt-container">
+      <h2>Affiliate Program — Earn 10%</h2>
+      <p class="nt-lead">Share your referral link and earn a 10% commission on every deposit your referrals make. Commissions are credited instantly to your NeonT wallet.</p>
+      <div class="nt-affiliate-actions">
+        <a href="register.html" class="nt-button nt-button-outline">Start Referring</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- AI MINING -->
+  <section class="nt-ai section-bg" style="background-image:url('images/ai-mining-bg.jpg')">
+    <div class="nt-container">
+      <h2>AI-Driven Mining & Strategy</h2>
+      <p>Our AI mining integrates predictive models and risk controls to identify profitable opportunities across the market. We balance reward and risk automatically — so investors get consistent compounding returns.</p>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="nt-testimonials section-bg" style="background-image:url('images/testimonials-bg.jpg')">
+    <div class="nt-container">
+      <h2>Testimonials</h2>
+      <div class="nt-testimonials-grid">
+        <figure class="nt-testimonial">
+          <img src="images/testimonial1.jpg" alt="testimonial">
+          <blockquote>“Neon(₿)Trade changed my portfolio. The AI feature gives me confidence to hold long-term.”</blockquote>
+          <figcaption>— Alex Morgan</figcaption>
+        </figure>
+
+        <figure class="nt-testimonial">
+          <img src="images/testimonial2.jpg" alt="testimonial">
+          <blockquote>“Quick approvals and transparent logs. Withdrawals are handled fast.”</blockquote>
+          <figcaption>— Jordan Lee</figcaption>
+        </figure>
+
+        <figure class="nt-testimonial">
+          <img src="images/testimonial3.jpg" alt="testimonial">
+          <blockquote>“The dashboard makes tracking profits enjoyable. I understand where my money goes.”</blockquote>
+          <figcaption>— Casey Taylor</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="nt-faq section-bg" style="background-image:url('images/faq-bg.jpg')">
+    <div class="nt-container">
+      <h2>Frequently Asked Questions</h2>
+      <div class="nt-faq-grid">
+        <div class="nt-faq-item">
+          <h3>How do I deposit?</h3>
+          <p>From your dashboard, copy the BTC wallet address and send funds from your wallet. Our Team verifies deposits and credits your account after confirmation.</p>
+        </div>
+        <div class="nt-faq-item">
+          <h3>How are profits paid?</h3>
+          <p>Profits accrue daily and are displayed in your dashboard. Withdrawals follow admin approval and security checks to ensure legitimacy.</p>
+        </div>
+        <div class="nt-faq-item">
+          <h3>Is Neon(₿)Trade secure?</h3>
+          <p>We use secure cloud providers, encrypted storage, and best-practice authentication.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TEAM / SHOWCASE -->
+  <section class="nt-team section-bg" style="background-image:url('images/team-bg.jpg')">
+    <div class="nt-container">
+      <h2>Our Visionary Team</h2>
+      <p>Neon(₿)Trade is built by experts in AI, blockchain, and finance. Our leadership and strategic partners (including public collaborators) drive an ecosystem built for growth and trust.</p>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="nt-footer">
+    <div class="nt-container">
+      <div class="nt-footer-inner">
+        <div>© 2025 Neon(₿)Trade</div>
+        <div class="nt-footer-links">
+          <a href="about.html">About</a>
+          <a href="plans.html">Plans</a>
+          <a href="contact.html">Contact</a>
+          <a href="privacy.html">Privacy</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Homepage script (slideshow + help button) -->
+  <script>
+    (function () {
+      // slideshow
+      const slides = document.querySelectorAll('.nt-hero-slide');
+      const dotsWrap = document.getElementById('nt-hero-dots');
+      let idx = 0;
+      function buildDots() {
+        if (!dotsWrap) return;
+        dotsWrap.innerHTML = '';
+        slides.forEach((s, i) => {
+          const dot = document.createElement('button');
+          dot.className = 'nt-hero-dot';
+          dot.dataset.i = i;
+          dot.addEventListener('click', () => { idx = i; show(); });
+          dotsWrap.appendChild(dot);
+        });
+      }
+      function show() {
+        slides.forEach((s, i) => { s.style.display = (i === idx) ? 'block' : 'none'; });
+        const dots = dotsWrap?.querySelectorAll('.nt-hero-dot') || [];
+        dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+      }
+      function next() { idx = (idx + 1) % slides.length; show(); }
+      buildDots();
+      show();
+      let timer = setInterval(next, 5000);
+      // pause on hover
+      document.querySelectorAll('.nt-hero-slide').forEach(s => {
+        s.addEventListener('mouseenter', () => clearInterval(timer));
+        s.addEventListener('mouseleave', () => timer = setInterval(next, 5000));
+      });
+
+      // Help button opens contact page (or modal if you add one)
+      document.getElementById('nt-help-btn').addEventListener('click', function () {
+        window.location.href = 'contact.html';
+      });
+
+      // If user clicked plan link with query ?plan=..., forward it to register with selection param
+      function readPlanLinks() {
+        document.querySelectorAll('a[href*="register.html?plan="]').forEach(a=>{
+          a.addEventListener('click', (e)=>{
+            // allow default navigation, register page's JS should read query string
+          });
+        });
+      }
+      readPlanLinks();
+    })();
+  </script>
+</body>
+</html>
